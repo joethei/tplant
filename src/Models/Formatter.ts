@@ -164,7 +164,7 @@ export abstract class Formatter {
                         const key: string = `${part.name} ${cardinality} ${typeName}`;
                         if (typeName !== part.name &&
                             !outputConstraints.hasOwnProperty(key) && mappedTypes.hasOwnProperty(typeName)) {
-                            associations.push(...this.addAssociation(part.name, cardinality, typeName));
+                            associations.push(...this.addAssociation(part.name + '::' + member.name, cardinality, typeName));
                             outputConstraints[key] = true;
                         }
                     }

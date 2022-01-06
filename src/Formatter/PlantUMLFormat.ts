@@ -26,7 +26,7 @@ export class PlantUMLFormat extends Formatter {
 
     public addAssociation(type1: string, cardinality: string, type2: string) : string[] {
         return [
-            `${type1} --> "${cardinality}" ${type2}`
+            `${type1} -[#` + (Math.random() * 0xFFFFFF << 0).toString(16).padStart(6, '0') + `]-> "${cardinality}" ${type2}`
         ];
     }
 
