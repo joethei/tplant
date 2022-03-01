@@ -1,4 +1,4 @@
-import ts from 'typescript';
+import typescript from 'typescript';
 import { File } from './Components/File';
 import { PlantUMLFormat } from './Formatter/PlantUMLFormat';
 import { ComponentKind } from './Models/ComponentKind';
@@ -43,7 +43,9 @@ export namespace tplant {
         associations: false,
         onlyInterfaces: false,
         format: 'plantuml',
-        onlyClasses: false
+        onlyClasses: false,
+        coloredAssociationLines: false,
+        fieldAssociations: false
     }): string {
 
         let formatter : Formatter;

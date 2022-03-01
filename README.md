@@ -8,7 +8,7 @@ Will convert a Typescript file to UML diagram. Following all inheritances.
 ### Install
 ```shell
 npm install --global tplant
-```
+``` 
 
 ### Generate image file (svg or png)
 ```shell
@@ -57,8 +57,36 @@ class Car {
 Car --> "*" Wheel
 @enduml
 ```
+
+### -F, --fieldAssociations
+    Show associations between fields and classes with cardinalities
+    Example:
+```typescript
+class Wheel {
+    public size: number;
+}
+class Car {
+    public wheel: Wheel[];
+}
+```
+```plantuml
+@startuml
+class Wheel {
+    +size: number
+}
+class Car {
+    +wheel: Wheel
+}
+Car::wheel --> "*" Wheel
+@enduml
+```
+
 ### -I, --only-interfaces
     Only convert interfaces
+
+
+### -L, --colored-lines
+    All association lines will receive a random color.
 
 ### -f, --format mermaid
 
