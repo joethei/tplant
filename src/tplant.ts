@@ -14,20 +14,20 @@ export namespace tplant {
 
     export function generateDocumentation(
         fileNames: ReadonlyArray<string>,
-        options: ts.CompilerOptions = ts.getDefaultCompilerOptions()
+        options: typescript.CompilerOptions = typescript.getDefaultCompilerOptions()
     ): IComponentComposite[] {
 
         // Build a program using the set of root file names in fileNames
-        const program: ts.Program = ts.createProgram(fileNames, options);
+        const program: typescript.Program = typescript.createProgram(fileNames, options);
 
         // Get the checker, we will use it to find more about classes
-        const checker: ts.TypeChecker = program.getTypeChecker();
+        const checker: typescript.TypeChecker = program.getTypeChecker();
 
         const result: IComponentComposite[] = [];
 
         // Visit every sourceFile in the program
         program.getSourceFiles()
-            .forEach((sourceFile: ts.SourceFile): void => {
+            .forEach((sourceFile: typescript.SourceFile): void => {
                 if (!sourceFile.isDeclarationFile) {
                     const file: IComponentComposite | undefined = FileFactory.create(sourceFile, checker);
                     if (file !== undefined) {
