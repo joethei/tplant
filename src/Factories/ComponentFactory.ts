@@ -20,7 +20,7 @@ export namespace ComponentFactory {
             node.parent.kind === ts.SyntaxKind.ModuleBlock;
     }
 
-    export function create(node: ts.Node, checker: ts.TypeChecker): IComponentComposite[] {
+    export function create(fileName: string, node: ts.Node, checker: ts.TypeChecker): IComponentComposite[] {
         const componentComposites: IComponentComposite[] = [];
 
         ts.forEachChild(node, (childNode: ts.Node) => {
@@ -31,43 +31,53 @@ export namespace ComponentFactory {
             }
 
             if (childNode.kind === ts.SyntaxKind.ClassDeclaration) {
-                const currentNode: ts.ClassLikeDeclarationBase = <ts.ClassLikeDeclarationBase>childNode;
-                if (currentNode.name === undefined) {
-                    return;
-                }
-                // This is a top level class, get its symbol
-                const classSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
-                if (classSymbol === undefined) {
-                    return;
-                }
-                componentComposites.push(ClassFactory.create(classSymbol, checker));
-
-                // No need to walk any further, class expressions/inner declarations
-                // cannot be exported
-            } else if (childNode.kind === ts.SyntaxKind.InterfaceDeclaration) {
-                const currentNode: ts.InterfaceDeclaration = <ts.InterfaceDeclaration>childNode;
-                const interfaceSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
-                if (interfaceSymbol === undefined) {
-                    return;
-                }
-                componentComposites.push(InterfaceFactory.create(interfaceSymbol, checker));
-            } else if (childNode.kind === ts.SyntaxKind.ModuleDeclaration) {
-                const currentNode: ts.NamespaceDeclaration = <ts.NamespaceDeclaration>childNode;
-                const namespaceSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
-                if (namespaceSymbol === undefined) {
-                    return;
-                }
-                componentComposites.push(NamespaceFactory.create(namespaceSymbol, checker));
-            } else if (childNode.kind === ts.SyntaxKind.EnumDeclaration) {
-                const currentNode: ts.EnumDeclaration = <ts.EnumDeclaration>childNode;
-                const enumSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
-                if (enumSymbol === undefined) {
-                    return;
-                }
-                componentComposites.push(EnumFactory.create(enumSymbol));
-
-                return;
+            const currentNode: ts.ClassLikeDeclarationBase = <ts.ClassLikeDeclarationBase>childNode;
+            if (currentNode.name === undefined) {
+              return;
             }
+            // This is a top level class, get its symbol
+            const classSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
+            if (classSymbol === undefined) {
+              return;
+            }
+            componentComposites.push(ClassFactory.create(fileName, classSymbol, checker));
+
+            // No need to walk any further, class expressions/inner declarations
+            // cannot be exported
+          } else if (childNode.kind === ts.SyntaxKind.InterfaceDeclaration) {
+            const currentNode: ts.InterfaceDeclaration = <ts.InterfaceDeclaration>childNode;
+            const interfaceSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
+            if (interfaceSymbol === undefined) {
+              return;
+            }
+            componentComposites.push(InterfaceFactory.create(interfaceSymbol, checker));
+          } else if (childNode.kind === ts.SyntaxKind.ModuleDeclaration) {
+            const currentNode: ts.NamespaceDeclaration = <ts.NamespaceDeclaration>childNode;
+            const namespaceSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
+            if (namespaceSymbol === undefined) {
+              return;
+            }
+            componentComposites.push(NamespaceFactory.create(fileName, namespaceSymbol, checker));
+          } else if (childNode.kind === ts.SyntaxKind.EnumDeclaration) {
+            const currentNode: ts.EnumDeclaration = <ts.EnumDeclaration>childNode;
+            const enumSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
+            if (enumSymbol === undefined) {
+              return;
+            }
+            componentComposites.push(EnumFactory.create(enumSymbol));
+
+            return;
+          } else if (childNode.kind === ts.SyntaxKind.FunctionDeclaration) {
+            const currentNode: ts.FunctionDeclaration = <ts.FunctionDeclaration>childNode;
+            if (currentNode.name === undefined) {
+              return;
+            }
+            const functionSymbol: ts.Symbol | undefined = checker.getSymbolAtLocation(currentNode.name);
+            if (functionSymbol === undefined) {
+              return;
+            }
+            componentComposites.push(MethodFactory.create(functionSymbol, currentNode, checker));
+          }
         });
 
         return componentComposites;
@@ -89,15 +99,50 @@ export namespace ComponentFactory {
         return 'public';
     }
 
-    export function getHeritageClauseNames(heritageClause: ts.HeritageClause, checker: ts.TypeChecker): string[] {
+    export function getHeritageClauseNames(heritageClause: ts.HeritageClause, checker: ts.TypeChecker): string[][] {
         return heritageClause.types.map((nodeObject: ts.ExpressionWithTypeArguments) => {
             const symbolAtLocation: ts.Symbol | undefined = checker.getSymbolAtLocation(nodeObject.expression);
             if (symbolAtLocation !== undefined) {
-                return checker.getFullyQualifiedName(symbolAtLocation);
+                const ogFile: string = getOriginalFile(symbolAtLocation, checker);
+
+                return [checker.getFullyQualifiedName(symbolAtLocation), ogFile];
             }
 
-            return '';
+            return ['', ''];
         });
+    }
+
+    function getOriginalFile(typeSymbol: ts.Symbol, checker: ts.TypeChecker): string {
+        let deAliasSymbol: ts.Symbol;
+
+        // tslint:disable-next-line:no-bitwise
+        if ((typeSymbol.flags & ts.SymbolFlags.Alias) !== 0) {
+            deAliasSymbol = checker.getAliasedSymbol(typeSymbol);
+        } else {
+            deAliasSymbol = typeSymbol;
+        }
+
+        return deAliasSymbol.declarations?.[0].getSourceFile().fileName;
+    }
+
+    export function getOriginalFileOriginalType(tsType: ts.Type, checker: ts.TypeChecker): string {
+        if (tsType === undefined || checker === undefined) { return ''; }
+
+        let deParameterType: ts.Type = tsType;
+        let typeSymbol: ts.Symbol | undefined = tsType.getSymbol();
+
+        while (typeSymbol?.name === 'Array') {
+            deParameterType = checker.getTypeArguments(<ts.TypeReference>deParameterType)[0];
+            typeSymbol = deParameterType.getSymbol();
+        }
+
+        if (typeSymbol === undefined) { return ''; }
+
+        return getOriginalFile(typeSymbol, checker);
+    }
+
+    function isConstructor(declaration: ts.NamedDeclaration): boolean {
+      return declaration.kind === ts.SyntaxKind.Constructor;
     }
 
     function isMethod(declaration: ts.NamedDeclaration): boolean {
@@ -127,13 +172,13 @@ export namespace ComponentFactory {
         return getModifier(memberModifiers);
     }
 
-    export function isAbstract(memberDeclaration: ts.Declaration): boolean {
+    export function isModifier(memberDeclaration: ts.Declaration, modifierKind: ts.SyntaxKind): boolean {
 
         const memberModifiers: ts.NodeArray<ts.Modifier> | undefined = memberDeclaration.modifiers;
 
         if (memberModifiers !== undefined) {
             for (const memberModifier of memberModifiers) {
-                if (memberModifier.kind === ts.SyntaxKind.AbstractKeyword) {
+                if (memberModifier.kind === modifierKind) {
                     return true;
                 }
             }
@@ -142,18 +187,27 @@ export namespace ComponentFactory {
         return false;
     }
 
-    export function isStatic(memberDeclaration: ts.Declaration): boolean {
-        const memberModifiers: ts.NodeArray<ts.Modifier> | undefined = memberDeclaration.modifiers;
+    export function serializeConstructors(
+        memberSymbols: ts.UnderscoreEscapedMap<ts.Symbol>,
+        checker: ts.TypeChecker
+    ): (Property | Method)[] {
+      const result: (Property | Method)[] = [];
 
-        if (memberModifiers !== undefined) {
-            for (const memberModifier of memberModifiers) {
-                if (memberModifier.kind === ts.SyntaxKind.StaticKeyword) {
-                    return true;
-                }
-            }
-        }
+      if (memberSymbols !== undefined) {
+          memberSymbols.forEach((memberSymbol: ts.Symbol): void => {
+              const memberDeclarations: ts.NamedDeclaration[] | undefined = memberSymbol.getDeclarations();
+              if (memberDeclarations === undefined) {
+                  return;
+              }
+              memberDeclarations.forEach((memberDeclaration: ts.NamedDeclaration): void => {
+                  if (isConstructor(memberDeclaration)) {
+                      result.push(MethodFactory.create(memberSymbol, memberDeclaration, checker));
+                  }
+              });
+          });
+      }
 
-        return false;
+      return result;
     }
 
     export function serializeMethods(memberSymbols: ts.UnderscoreEscapedMap<ts.Symbol>, checker: ts.TypeChecker): (Property | Method)[] {
