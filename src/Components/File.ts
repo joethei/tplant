@@ -5,6 +5,6 @@ import { ComponentComposite, IComponentComposite } from '../Models/IComponentCom
  * Represents the metadata for a file containing typescript
  */
 export class File extends ComponentComposite {
-    public readonly componentKind: ComponentKind = ComponentKind.FILE;
-    public parts: IComponentComposite[] = [];
+  public readonly componentKind: ComponentKind = ComponentKind.FILE;
+  public parts: IComponentComposite[] = [];
 }

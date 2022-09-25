@@ -1,9 +1,10 @@
 {
-    "extends": [
-        "tslint:recommended",
-        "tslint-microsoft-contrib"
-    ],
-    "rules": {
-        "no-relative-imports": false
-    }
+  "extends": [
+    "tslint:recommended",
+    "tslint-microsoft-contrib"
+  ],
+  "rules": {
+    "no-relative-imports": false,
+    "max-line-length": 160
+  }
 }

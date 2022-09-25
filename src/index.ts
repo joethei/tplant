@@ -8,9 +8,9 @@ import glob from 'glob';
 import http from 'http';
 import os from 'os';
 import path from 'path';
-import {encode} from 'plantuml-encoder';
+import { encode } from 'plantuml-encoder';
 import typescript from 'typescript';
-import {tplant} from './tplant';
+import { tplant } from './tplant';
 
 const AVAILABLE_PLANTUML_EXTENSIONS: string[] = ['svg', 'png', 'txt'];
 
@@ -77,7 +77,7 @@ glob(<string>commander.input, {}, (err: Error | null, matches: string[]): void =
   fs.writeFileSync(<string>commander.output, plantUMLDocument, 'utf-8');
 });
 
-function findTsConfigFile(inputPath: string, tsConfigPath?: string): string | undefined {
+function findTsConfigFile (inputPath: string, tsConfigPath?: string): string | undefined {
   if (tsConfigPath !== undefined) {
     // tslint:disable-next-line non-literal-fs-path
     const tsConfigStats: fs.Stats = fs.statSync(tsConfigPath);
@@ -105,10 +105,10 @@ function findTsConfigFile(inputPath: string, tsConfigPath?: string): string | un
     return cwdTsConfigFile;
   }
 
-  return;
+  return undefined;
 }
 
-function getCompilerOptions(tsConfigFilePath?: string): typescript.CompilerOptions {
+function getCompilerOptions (tsConfigFilePath?: string): typescript.CompilerOptions {
   if (tsConfigFilePath === undefined) {
     return typescript.getDefaultCompilerOptions();
   }
@@ -143,12 +143,12 @@ function getCompilerOptions(tsConfigFilePath?: string): typescript.CompilerOptio
   return convertedCompilerOptions.options;
 }
 
-function requestImageFile(output: string, input: string, extension: string): void {
+function requestImageFile (output: string, input: string, extension: string): void {
   http.get({
-             host: 'www.plantuml.com',
-             path: `/plantuml/${extension}/${encode(input)}`
-           },
-           (res: http.IncomingMessage): void => {
+    host: 'www.plantuml.com',
+    path: `/plantuml/${extension}/${encode(input)}`
+  },
+  (res: http.IncomingMessage): void => {
     // tslint:disable-next-line non-literal-fs-path
     const fileStream: fs.WriteStream = fs.createWriteStream(output);
     res.setEncoding('utf-8');

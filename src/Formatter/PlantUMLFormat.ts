@@ -1,32 +1,31 @@
 import * as os from 'os';
-import {Class} from '../Components/Class';
-import {Enum} from '../Components/Enum';
-import {EnumValue} from '../Components/EnumValue';
-import {Interface} from '../Components/Interface';
-import {Method} from '../Components/Method';
-import {Namespace} from '../Components/Namespace';
-import {Parameter} from '../Components/Parameter';
-import {Property} from '../Components/Property';
-import {TypeParameter} from '../Components/TypeParameter';
-import {Formatter} from '../Models/Formatter';
-import {IComponentComposite} from '../Models/IComponentComposite';
+import { Class } from '../Components/Class';
+import { Enum } from '../Components/Enum';
+import { EnumValue } from '../Components/EnumValue';
+import { Interface } from '../Components/Interface';
+import { Method } from '../Components/Method';
+import { Namespace } from '../Components/Namespace';
+import { Parameter } from '../Components/Parameter';
+import { Property } from '../Components/Property';
+import { TypeParameter } from '../Components/TypeParameter';
+import { Formatter } from '../Models/Formatter';
+import { IComponentComposite } from '../Models/IComponentComposite';
 
 /**
  * Export diagram class using plantuml format
  */
 export class PlantUMLFormat extends Formatter {
-
-  public header(): string[] {
+  public header (): string[] {
     return ['@startuml'];
   }
 
-  public footer(): string[] {
+  public footer (): string[] {
     return ['@enduml'];
   }
 
-  public addAssociation(type1: string, cardinality: string, type2: string): string[] {
+  public addAssociation (type1: string, cardinality: string, type2: string): string[] {
     if (this.options.coloredAssociationLines) {
-      //generating random color, taken from: https://stackoverflow.com/a/5092846/5589264
+      // generating random color, taken from: https://stackoverflow.com/a/5092846/5589264
       // tslint:disable-next-line:insecure-random no-bitwise
       const randomColor: string = (Math.random() * 0xFFFFFF << 0)
         .toString(16)
@@ -42,7 +41,7 @@ export class PlantUMLFormat extends Formatter {
     ];
   }
 
-  public serializeClass(comp: Class): string {
+  public serializeClass (comp: Class): string {
     const result: string[] = [];
     const firstLine: string[] = [];
     if (comp.isAbstract) {
@@ -52,8 +51,8 @@ export class PlantUMLFormat extends Formatter {
     if (comp.typeParameters.length > 0) {
       firstLine.push('<');
       firstLine.push(comp.typeParameters
-                       .map((typeParameter: IComponentComposite): string => this.serializeTypeParameter(<TypeParameter>typeParameter))
-                       .join(', '));
+        .map((typeParameter: IComponentComposite): string => this.serializeTypeParameter(<TypeParameter>typeParameter))
+        .join(', '));
       firstLine.push('>');
     }
     if (comp.extendsClass !== undefined) {
@@ -67,7 +66,7 @@ export class PlantUMLFormat extends Formatter {
     return result.join(os.EOL);
   }
 
-  public serializeMembers(comp: Class | Interface, firstLine: string[], result: string[]): void {
+  public serializeMembers (comp: Class | Interface, firstLine: string[], result: string[]): void {
     if (comp.members.length > 0) {
       firstLine.push(' {');
     }
@@ -80,7 +79,7 @@ export class PlantUMLFormat extends Formatter {
     }
   }
 
-  public serializeEnum(comp: Enum): string {
+  public serializeEnum (comp: Enum): string {
     const result: string[] = [];
     let declaration: string = `enum ${comp.name}`;
     if (comp.values.length > 0) {
@@ -97,15 +96,15 @@ export class PlantUMLFormat extends Formatter {
     return result.join(os.EOL);
   }
 
-  public serializeInterface(comp: Interface): string {
+  public serializeInterface (comp: Interface): string {
     const result: string[] = [];
     const firstLine: string[] = [];
     firstLine.push(`interface ${comp.name}`);
     if (comp.typeParameters.length > 0) {
       firstLine.push('<');
       firstLine.push(comp.typeParameters
-                       .map((typeParameter: IComponentComposite): string => this.serializeTypeParameter(<TypeParameter>typeParameter))
-                       .join(', '));
+        .map((typeParameter: IComponentComposite): string => this.serializeTypeParameter(<TypeParameter>typeParameter))
+        .join(', '));
       firstLine.push('>');
     }
     if (comp.extendsInterface.length > 0) {
@@ -116,8 +115,8 @@ export class PlantUMLFormat extends Formatter {
     return result.join(os.EOL);
   }
 
-  public serializeMethod(comp: Method): string {
-    let result: string = {public: '+', private: '-', protected: '#'}[comp.modifier];
+  public serializeMethod (comp: Method): string {
+    let result: string = { public: '+', private: '-', protected: '#' }[comp.modifier];
     result += (comp.isAbstract ? '{abstract} ' : '');
     result += (comp.isStatic ? '{static} ' : '');
     result += `${comp.name}(`;
@@ -129,7 +128,7 @@ export class PlantUMLFormat extends Formatter {
     return result;
   }
 
-  public serializeNamespace(comp: Namespace): string {
+  public serializeNamespace (comp: Namespace): string {
     const result: string[] = [];
     result.push(`namespace ${comp.name} {`);
     comp.parts.forEach((part: IComponentComposite): void => {
@@ -143,12 +142,12 @@ export class PlantUMLFormat extends Formatter {
     return result.join(os.EOL);
   }
 
-  public serializeParameter(comp: Parameter): string {
+  public serializeParameter (comp: Parameter): string {
     return `${comp.name}${comp.isOptional || comp.hasInitializer ? '?' : ''}: ${comp.parameterType}`;
   }
 
-  public serializeProperty(comp: Property): string {
-    let result: string = {public: '+', private: '-', protected: '#'}[comp.modifier];
+  public serializeProperty (comp: Property): string {
+    let result: string = { public: '+', private: '-', protected: '#' }[comp.modifier];
     result += (comp.isAbstract ? '{abstract} ' : '');
     result += (comp.isStatic ? '{static} ' : '');
     result += `${comp.name}${(comp.isOptional ? '?' : '')}: ${comp.returnType}`;
@@ -156,8 +155,7 @@ export class PlantUMLFormat extends Formatter {
     return result;
   }
 
-  public serializeTypeParameter(comp: TypeParameter): string {
+  public serializeTypeParameter (comp: TypeParameter): string {
     return `${comp.name}${(comp.constraint !== undefined ? ` extends ${comp.constraint}` : '')}`;
   }
-
 }

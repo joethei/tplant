@@ -5,6 +5,6 @@ import { ComponentComposite, IComponentComposite } from '../Models/IComponentCom
  * Represents the metadata for a namespace within typescript
  */
 export class Namespace extends ComponentComposite {
-    public readonly componentKind: ComponentKind = ComponentKind.NAMESPACE;
-    public parts: IComponentComposite[] = [];
+  public readonly componentKind: ComponentKind = ComponentKind.NAMESPACE;
+  public parts: IComponentComposite[] = [];
 }

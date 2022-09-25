@@ -1,17 +1,17 @@
 import * as os from 'os';
-import {Class} from '../Components/Class';
-import {Enum} from '../Components/Enum';
-import {EnumValue} from '../Components/EnumValue';
-import {File} from '../Components/File';
-import {Interface} from '../Components/Interface';
-import {Method} from '../Components/Method';
-import {Namespace} from '../Components/Namespace';
-import {Parameter} from '../Components/Parameter';
-import {Property} from '../Components/Property';
-import {TypeParameter} from '../Components/TypeParameter';
-import {ComponentKind} from './ComponentKind';
-import {ICommandOptions} from './ICommandOptions';
-import {IComponentComposite} from './IComponentComposite';
+import { Class } from '../Components/Class';
+import { Enum } from '../Components/Enum';
+import { EnumValue } from '../Components/EnumValue';
+import { File } from '../Components/File';
+import { Interface } from '../Components/Interface';
+import { Method } from '../Components/Method';
+import { Namespace } from '../Components/Namespace';
+import { Parameter } from '../Components/Parameter';
+import { Property } from '../Components/Property';
+import { TypeParameter } from '../Components/TypeParameter';
+import { ComponentKind } from './ComponentKind';
+import { ICommandOptions } from './ICommandOptions';
+import { IComponentComposite } from './IComponentComposite';
 
 const REGEX_ONLY_TYPE_NAMES: RegExp = /\w+/g;
 const REGEX_TYPE_NAMES_WITH_ARRAY: RegExp = /\w+(?:\[\])?/g;
@@ -20,30 +20,29 @@ const REGEX_TYPE_NAMES_WITH_ARRAY: RegExp = /\w+(?:\[\])?/g;
  * Define a format for class diagram
  */
 export abstract class Formatter {
-
   /**
    * Options sent to the cli
    */
   protected options: ICommandOptions;
 
-  constructor(options: ICommandOptions) {
+  constructor (options: ICommandOptions) {
     this.options = options;
   }
 
-  public header(): string[] {
+  public header (): string[] {
     return [];
   }
 
-  public footer(): string[] {
+  public footer (): string[] {
     return [];
   }
 
   // @ts-ignore
-  public addAssociation(type1: string, cardinality: string, type2: string): string[] {
+  public addAssociation (type1: string, cardinality: string, type2: string): string[] {
     return [];
   }
 
-  public serializeFile(file: File): string {
+  public serializeFile (file: File): string {
     const result: string[] = [];
     file.parts.forEach((part: IComponentComposite): void => {
       result.push(this.serialize(part));
@@ -56,7 +55,7 @@ export abstract class Formatter {
 
   public abstract serializeEnum(component: Enum): string;
 
-  public serializeEnumValue(component: EnumValue): string {
+  public serializeEnumValue (component: EnumValue): string {
     return component.name;
   }
 
@@ -72,7 +71,7 @@ export abstract class Formatter {
 
   public abstract serializeTypeParameter(component: TypeParameter): string;
 
-  public serialize(component: IComponentComposite): string {
+  public serialize (component: IComponentComposite): string {
     if (component.componentKind === ComponentKind.CLASS) {
       return this.serializeClass(<Class>component);
     } else if (component.componentKind === ComponentKind.FILE) {
@@ -97,7 +96,7 @@ export abstract class Formatter {
     throw new Error('Unknown Component');
   }
 
-  public renderFiles(files: IComponentComposite[], associations: boolean): string {
+  public renderFiles (files: IComponentComposite[], associations: boolean): string {
     const lines: string[] = [];
 
     lines.push(...this.header());
@@ -117,7 +116,7 @@ export abstract class Formatter {
     return lines.join(os.EOL);
   }
 
-  public createAssociations(files: IComponentComposite[]): string[] {
+  public createAssociations (files: IComponentComposite[]): string[] {
     const associations: string[] = [];
 
     const mappedTypes: { [x: string]: boolean } = {};
@@ -178,7 +177,6 @@ export abstract class Formatter {
               outputConstraints[key] = true;
             }
           }
-
         });
       });
     });

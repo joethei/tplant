@@ -1,5 +1,5 @@
-import { Vector } from "./Vector";
-import { Color } from "./Color";
+import { Vector } from './Vector';
+import { Color } from './Color';
 
 export interface Light {
     pos: Vector;

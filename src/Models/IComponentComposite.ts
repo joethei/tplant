@@ -12,7 +12,7 @@ export abstract class ComponentComposite implements IComponentComposite {
     public abstract readonly componentKind: ComponentKind;
     public readonly name: string;
 
-    constructor(name: string) {
-        this.name = name;
+    constructor (name: string) {
+      this.name = name;
     }
 }

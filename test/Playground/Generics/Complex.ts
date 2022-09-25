@@ -11,21 +11,22 @@ interface GenericInterface3<T extends string, A extends number> extends GenericI
 }
 
 class GenericClass<T extends string, A extends number> implements GenericInterface<T>, GenericInterface3<T, A> {
-    property?: T;
-    method(arg: T): T {
-        return arg;
-    }
-    method2(arg: A): A {
-        return arg;
-    }
+  property?: T;
+  method (arg: T): T {
+    return arg;
+  }
+
+  method2 (arg: A): A {
+    return arg;
+  }
 }
 
 class GenericClass2<T extends string> implements GenericInterface2<T> {
-    constructor(public property?: T) {}
+  constructor (public property?: T) {}
 }
 
 class ConcreteClass extends GenericClass<string, number> implements GenericInterface<string>, GenericInterface2<string> {
-    property: string;
+  property: string;
 }
 
 interface GenericTypes {
